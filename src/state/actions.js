@@ -30,14 +30,16 @@ export function getPopularMovies () {
         const combinedResults = fullList.map(movie => {
           return {
             artworkUrl100: movie.artworkUrl100,
-            releaseYear: movie.releaseYear,
+            releaseYear: movie.releaseDate.split('-')[0],
             trackHdPrice: movie.trackHdPrice,
-            longDescription: movie.longDescription
+            longDescription: movie.longDescription,
+            trackName: movie.trackName,
           }
         })
 
-        console.log(combinedResults)
-
+        combinedResults.sort((a,b) => {
+          return b.releaseYear - a.releaseYear;
+        })
         //
         // 1. combine the results of these requests
         // 2. sort the results FIRST by year THEN by title (trackName)
