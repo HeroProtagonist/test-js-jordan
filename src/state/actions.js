@@ -17,17 +17,18 @@ export function getPopularMovies () {
         // jsonResponses contains the results of two API requests
         //
 
-        //check error
-        console.log(jsonResponses)
+        //
+        // 1. combine the results of these requests
+        // 2. sort the results FIRST by year THEN by title (trackName)
+        // 3. each movie object in the results needs a releaseYear attribute added
+        //    this is used in src/components/movies-list.js line 26
+        //
 
-       /* <td><img src={movie.artworkUrl100} /></td>
-        <td>{movie.releaseYear}</td>
-        <td>{movie.trackName}</td>
-        <td>{`$${movie.trackHdPrice}`}</td>
-        <td>{movie.longDescription}</td> */
-
+        // combine both array lists
         const fullList = [...jsonResponses[0].results, ...jsonResponses[1].results];
 
+        // extract relevant fields from movie objects, and move 'The' to end of title 
+        // if it appears
         let combinedResults = fullList.map(movie => {
 
           let splitTrackName = movie.trackName.split(' ');
@@ -47,41 +48,30 @@ export function getPopularMovies () {
           }
         });
 
-
+        // create descending array of unique movie years
         const years = uniq(combinedResults.map(movie => movie.releaseYear));
-
         years.sort().reverse();
-
-        // object preserving order
         
+        // create object where keys are each movie year, with arrays to hold movies
+        // of that year
         const yearBuckets = {};
-
         years.forEach(year => {
           yearBuckets[year] = [];
         });
 
+        // add movie to proper year
         combinedResults.forEach(movie => {
           yearBuckets[movie.releaseYear].push(movie);
         });
 
+        // sort each year bucket but the track name
         for (let key in yearBuckets) {
           yearBuckets[key] = sortBy(yearBuckets[key], ['trackName']);
         }
 
-        // preserve proper year order
+        // combine buckets, preserving proper year order, and flatten array
         combinedResults = flattenDeep(years.map(year => yearBuckets[year]));
-
-        console.log(combinedResults)
-        
-        //
-        // 1. combine the results of these requests
-        // 2. sort the results FIRST by year THEN by title (trackName)
-        // 3. each movie object in the results needs a releaseYear attribute added
-        //    this is used in src/components/movies-list.js line 26
-        //
-
-        // const combinedResults = []
-
+      
         return dispatch({
           type: 'GET_MOVIES_SUCCESS',
           movies: combinedResults
