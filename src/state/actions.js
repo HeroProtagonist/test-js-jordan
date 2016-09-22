@@ -16,6 +16,28 @@ export function getPopularMovies () {
         // jsonResponses contains the results of two API requests
         //
 
+        //check error
+        console.log(jsonResponses)
+
+       /* <td><img src={movie.artworkUrl100} /></td>
+        <td>{movie.releaseYear}</td>
+        <td>{movie.trackName}</td>
+        <td>{`$${movie.trackHdPrice}`}</td>
+        <td>{movie.longDescription}</td> */
+
+        const fullList = [...jsonResponses[0].results, ...jsonResponses[1].results];
+
+        const combinedResults = fullList.map(movie => {
+          return {
+            artworkUrl100: movie.artworkUrl100,
+            releaseYear: movie.releaseYear,
+            trackHdPrice: movie.trackHdPrice,
+            longDescription: movie.longDescription
+          }
+        })
+
+        console.log(combinedResults)
+
         //
         // 1. combine the results of these requests
         // 2. sort the results FIRST by year THEN by title (trackName)
@@ -23,7 +45,7 @@ export function getPopularMovies () {
         //    this is used in src/components/movies-list.js line 26
         //
 
-        const combinedResults = []
+        // const combinedResults = []
 
         return dispatch({
           type: 'GET_MOVIES_SUCCESS',
