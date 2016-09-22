@@ -1,6 +1,6 @@
 import fetch from 'fetch-jsonp'
 import moment from 'moment'
-import { uniq } from 'lodash'
+import { uniq, sortBy, flattenDeep } from 'lodash'
 
 export function getPopularMovies () {
   return dispatch => {
@@ -28,7 +28,16 @@ export function getPopularMovies () {
 
         const fullList = [...jsonResponses[0].results, ...jsonResponses[1].results];
 
-        const combinedResults = fullList.map(movie => {
+        let combinedResults = fullList.map(movie => {
+
+          let splitTrackName = movie.trackName.split(' ');
+          if (splitTrackName[0] === 'The') {
+            let lastWord = splitTrackName[splitTrackName.length - 1];
+            splitTrackName.shift();
+            splitTrackName[splitTrackName.length - 1] = `${lastWord}, The`;
+            movie.trackName = splitTrackName.join(' ');
+          }
+
           return {
             artworkUrl100: movie.artworkUrl100,
             releaseYear: movie.releaseDate.split('-')[0],
@@ -55,8 +64,14 @@ export function getPopularMovies () {
           yearBuckets[movie.releaseYear].push(movie);
         });
 
-        console.log(yearBuckets)
+        for (let key in yearBuckets) {
+          yearBuckets[key] = sortBy(yearBuckets[key], ['trackName']);
+        }
 
+        // preserve proper year order
+        combinedResults = flattenDeep(years.map(year => yearBuckets[year]));
+
+        console.log(combinedResults)
         
         //
         // 1. combine the results of these requests
