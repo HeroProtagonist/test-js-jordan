@@ -1,5 +1,6 @@
 import fetch from 'fetch-jsonp'
 import moment from 'moment'
+import { uniq } from 'lodash'
 
 export function getPopularMovies () {
   return dispatch => {
@@ -35,11 +36,28 @@ export function getPopularMovies () {
             longDescription: movie.longDescription,
             trackName: movie.trackName,
           }
-        })
+        });
 
-        combinedResults.sort((a,b) => {
-          return b.releaseYear - a.releaseYear;
-        })
+
+        const years = uniq(combinedResults.map(movie => movie.releaseYear));
+
+        years.sort().reverse();
+
+        // object preserving order
+        
+        const yearBuckets = {};
+
+        years.forEach(year => {
+          yearBuckets[year] = [];
+        });
+
+        combinedResults.forEach(movie => {
+          yearBuckets[movie.releaseYear].push(movie);
+        });
+
+        console.log(yearBuckets)
+
+        
         //
         // 1. combine the results of these requests
         // 2. sort the results FIRST by year THEN by title (trackName)
